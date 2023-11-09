@@ -1,15 +1,11 @@
 package main
 
 import (
-	"encoding/csv"
-	"fmt"
-	"math/rand"
-	"os"
-	"quiz/utils"
-	"quiz/utils/parsers"
+	"quiz/cmd/quiz"
 )
 
 func main() {
+<<<<<<< HEAD
 	/* This opens the Questions file */
 
 	problemFile, testTime, shuffle := utils.GetArguments()
@@ -41,4 +37,7 @@ func main() {
 			userErrs.PrintUnattempted()
 		}
 	}
+=======
+	quiz.Execute()
+>>>>>>> 87151503e130aed105c6e0e134a4c34dceacd7a9
 }

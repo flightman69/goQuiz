@@ -1,19 +1,20 @@
-package utils
+package ui
 
 import (
 	"bufio"
 	"fmt"
+	"math"
 	"os"
-	"quiz/types"
+	"quiz/pkg/customTypes"
 	"strings"
 	"time"
 )
 
 // takes in a problem array and total time limit prints the questions, returns marks and errors
-func QuestionUser(questions []types.Problem, totalTime int, reader types.ReaderFunc, testTimer types.TimerFunc) (int, error) {
+func QuestionUser(questions []customTypes.Problem, totalTime customTypes.TimeConf, reader customTypes.ReaderFunc, testTimer customTypes.TimerFunc) (int, error) {
 	marks := 0
 	attempted := 0
-	var errors []types.UserError
+	var errors []customTypes.UserError
 	var qEval QuizEvaluation
 	answerCh := make(chan string)
 	for pid, problem := range questions {
@@ -24,7 +25,7 @@ func QuestionUser(questions []types.Problem, totalTime int, reader types.ReaderF
 		}()
 
 		select {
-		case <-testTimer(time.Duration(totalTime) * time.Second):
+		case <-testTimer(totalTime):
 			fmt.Println("\nTime limit reached!")
 			if attempted != len(questions) {
 				// timer ran out , questions missed
@@ -42,7 +43,7 @@ func QuestionUser(questions []types.Problem, totalTime int, reader types.ReaderF
 			if ans == strings.TrimSpace(problem.Answer) {
 				marks++
 			} else {
-				errors = append(errors, types.UserError{GivenProb: problem, UserAns: ans, QuesNo: pid + 1})
+				errors = append(errors, customTypes.UserError{GivenProb: problem, UserAns: ans, QuesNo: pid + 1})
 			}
 		}
 	}
@@ -61,6 +62,22 @@ func ConsoleReader() (string, error) {
 	return strings.TrimSpace(answer), err
 }
 
-func QuizTimer(d time.Duration) <-chan time.Time {
-	return time.After(d)
+func QuizTimer(tconf customTypes.TimeConf) <-chan time.Time {
+	qtime := tconf.Time
+	var t time.Duration
+	if qtime > 0 {
+		switch tconf.Unit {
+		case "sec":
+			t = time.Duration(qtime) * time.Second
+		case "min":
+			t = time.Duration(qtime) * time.Minute
+		case "hour":
+			t = time.Duration(qtime) * time.Hour
+		}
+
+	} else {
+		t = time.Duration(math.MaxInt64)
+	}
+
+	return time.After(t)
 }
